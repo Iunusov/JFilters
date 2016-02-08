@@ -1,8 +1,6 @@
 #ifndef __plugin__
 #define __plugin__
 
-#define LABEL_MAX_LENGTH 32
-
 #define VST_PROGRAMS_COUNT 1
 #define VST_PARAMS_COUNT 2
 
@@ -13,13 +11,12 @@
 #define FILTER_RIPPLE 0.0001
 #define FILTER_CHEBYSHEV_ORDER 4
 
-#include <math.h>
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 #include "DspFilters/Dsp.h"
 
 typedef struct {
-	char name[LABEL_MAX_LENGTH];
-	char label[LABEL_MAX_LENGTH];
+	char name[kVstMaxParamStrLen];
+	char label[kVstMaxParamStrLen];
 	double value;
 	double raw_value;
 } plugin_params;
@@ -28,9 +25,9 @@ class Plugin: public AudioEffectX {
 public:
 	Plugin(audioMasterCallback audioMaster) :
 			AudioEffectX(audioMaster, VST_PROGRAMS_COUNT, VST_PARAMS_COUNT) {
-		vst_strncpy(params[VST_INDEX_CUTOFF].name, "Cutoff", LABEL_MAX_LENGTH);
-		vst_strncpy(params[VST_INDEX_CUTOFF].label, "Hz", LABEL_MAX_LENGTH);
-		vst_strncpy(params[VST_INDEX_SLOPE].name, "Slope", LABEL_MAX_LENGTH);
+		vst_strncpy(params[VST_INDEX_CUTOFF].name, "Cutoff", kVstMaxParamStrLen);
+		vst_strncpy(params[VST_INDEX_CUTOFF].label, "Hz", kVstMaxParamStrLen);
+		vst_strncpy(params[VST_INDEX_SLOPE].name, "Slope", kVstMaxParamStrLen);
 		setNumInputs(2);		// stereo in
 		setNumOutputs(2);		// stereo out
 		setUniqueID (UID);	// identify
@@ -125,15 +122,17 @@ public:
 		return VENDOR_VERSION;
 	}
 
+	
 protected:
 	Dsp::Params filter_params;
 	TFILTER Filter;
 	plugin_params params[VST_PARAMS_COUNT];
-	char programName[kVstMaxProgNameLen + 1];
+	char programName[kVstMaxProgNameLen];
 	double calc_cutoff(double value) {
-		return std::min(
-				0.5 * pow(value, params[VST_INDEX_SLOPE].value + 1)
-						* getSampleRate() + 20, 0.5 * getSampleRate());
+		const double MIN_CUTOFF = 20.0;
+		const double exp = pow(value, params[VST_INDEX_SLOPE].value + 1.0);
+		const double frequency = 0.5 * getSampleRate();
+		return MIN_CUTOFF + exp * (frequency - MIN_CUTOFF);
 	}
 };
 #endif
