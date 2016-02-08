@@ -14,9 +14,13 @@
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 #include "DspFilters/Dsp.h"
 
+#include <string>
+
+using namespace std;
+
 typedef struct {
-	char name[kVstMaxParamStrLen];
-	char label[kVstMaxParamStrLen];
+	string name;
+	string label;
 	double value;
 	double raw_value;
 } plugin_params;
@@ -25,9 +29,9 @@ class Plugin: public AudioEffectX {
 public:
 	Plugin(audioMasterCallback audioMaster) :
 			AudioEffectX(audioMaster, VST_PROGRAMS_COUNT, VST_PARAMS_COUNT) {
-		vst_strncpy(params[VST_INDEX_CUTOFF].name, "Cutoff", kVstMaxParamStrLen);
-		vst_strncpy(params[VST_INDEX_CUTOFF].label, "Hz", kVstMaxParamStrLen);
-		vst_strncpy(params[VST_INDEX_SLOPE].name, "Slope", kVstMaxParamStrLen);
+		params[VST_INDEX_CUTOFF].name = "Cutoff";
+		params[VST_INDEX_CUTOFF].label = "Hz";
+		params[VST_INDEX_SLOPE].name = "Slope";
 		setNumInputs(2);		// stereo in
 		setNumOutputs(2);		// stereo out
 		setUniqueID (UID);	// identify
@@ -97,13 +101,13 @@ public:
 		return (float) params[index].raw_value;
 	}
 	virtual void getParameterLabel(VstInt32 index, char* label) {
-		vst_strncpy(label, params[index].label, kVstMaxParamStrLen);
+		vst_strncpy(label, params[index].label.c_str(), kVstMaxParamStrLen);
 	}
 	virtual void getParameterDisplay(VstInt32 index, char* text) {
 		float2string((float) params[index].value, text, kVstMaxParamStrLen);
 	}
 	virtual void getParameterName(VstInt32 index, char* label) {
-		vst_strncpy(label, params[index].name, kVstMaxParamStrLen);
+		vst_strncpy(label, params[index].name.c_str(), kVstMaxParamStrLen);
 	}
 
 	virtual bool getEffectName(char* name) {
