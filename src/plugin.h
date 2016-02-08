@@ -13,108 +13,127 @@
 #define FILTER_RIPPLE 0.0001
 #define FILTER_CHEBYSHEV_ORDER 4
 
-#include "math.h" 
+#include <math.h>
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 #include "DspFilters/Dsp.h"
-#include "define.h"
 
-class AFilter{
-protected:
-	Dsp::Filter *Filter;
-	Dsp::Params filter_params;
+typedef struct {
+	char name[LABEL_MAX_LENGTH];
+	char label[LABEL_MAX_LENGTH];
+	double value;
+	double raw_value;
+} plugin_params;
+template<class TFILTER>
+class Plugin: public AudioEffectX {
 public:
-	void process(int numSamples, double **arr){
-		Filter->process(numSamples, arr);
+	Plugin(audioMasterCallback audioMaster) :
+			AudioEffectX(audioMaster, VST_PROGRAMS_COUNT, VST_PARAMS_COUNT) {
+		vst_strncpy(params[VST_INDEX_CUTOFF].name, "Cutoff", LABEL_MAX_LENGTH);
+		vst_strncpy(params[VST_INDEX_CUTOFF].label, "Hz", LABEL_MAX_LENGTH);
+		vst_strncpy(params[VST_INDEX_SLOPE].name, "Slope", LABEL_MAX_LENGTH);
+		setNumInputs(2);		// stereo in
+		setNumOutputs(2);		// stereo out
+		setUniqueID (UID);	// identify
+		canProcessReplacing();	// supports replacing output
+		canDoubleReplacing();	// supports double precision processing
+		params[VST_INDEX_CUTOFF].raw_value = 0.5;
+		params[VST_INDEX_SLOPE].value = 0;
+		params[VST_INDEX_SLOPE].raw_value = 0;
+		vst_strncpy(programName, "Default", kVstMaxProgNameLen);// default program name
 	}
-	void process(int numSamples, float **arr){
-		Filter->process(numSamples, arr);
+	~Plugin() {
 	}
-	~AFilter(){delete Filter;}
-};
-
-class LPFilter: public AFilter{
-public:
-	LPFilter(){
-		Filter = new Dsp::SmoothedFilterDesign
-      <Dsp::ChebyshevI::Design::LowPass <FILTER_CHEBYSHEV_ORDER>, 2>(2048);
-	}
-	void setup(double sRate, int order, double cutoff, double ripple){
-		filter_params[0] = sRate; // sample rate
-        filter_params[1] = order;
-        filter_params[2] = cutoff; // corner frequency
-        filter_params[3] = ripple; // passband ripple
-	    Filter->setParams(filter_params); 
-	}
-};
-
-class HPFilter: public AFilter{
-public:
-	HPFilter(){
-		Filter = new Dsp::SmoothedFilterDesign
-      <Dsp::ChebyshevI::Design::HighPass <FILTER_CHEBYSHEV_ORDER>, 2>(2048);
-	}
-	void setup(double sRate, int order, double cutoff, double ripple){
-		filter_params[0] = sRate; // sample rate
-        filter_params[1] = order;
-        filter_params[2] = cutoff; // corner frequency
-        filter_params[3] = ripple; // passband ripple
-	    Filter->setParams(filter_params); 
-	}
-};
-
-class BPFilter: public AFilter{
-public:
-	BPFilter(){
-		Filter = new Dsp::SmoothedFilterDesign
-      <Dsp::RBJ::Design::BandPass1, 2>(2048);
-	}
-	void setup(double sRate, int order, double cutoff, double ripple){
-		filter_params[0] = sRate; // sample rate
-        filter_params[1] = cutoff; // corner frequency
-		filter_params[2] = 2; //bandwidth
-	    Filter->setParams(filter_params); 
-	}
-};
-//-----------------------------------------------------------------------------------------------------------
-typedef struct{
-	  char name[LABEL_MAX_LENGTH];
-	  char label[LABEL_MAX_LENGTH];
-	  double value;
-	  double raw_value;
-    } plugin_params;
-class Plugin : public AudioEffectX
-{
-public:
-	Plugin (audioMasterCallback audioMaster);
-	~Plugin ();
 
 	// Processing
-	virtual void processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames);
-	virtual void processDoubleReplacing (double** inputs, double** outputs, VstInt32 sampleFrames);
-
+	virtual void processReplacing(float** inputs, float** outputs,
+			VstInt32 sampleFrames) {
+		float* in1 = inputs[0];
+		float* in2 = inputs[1];
+		float* out1 = outputs[0];
+		float* out2 = outputs[1];
+		Filter.setup(getSampleRate(), FILTER_CHEBYSHEV_ORDER,
+				params[VST_INDEX_CUTOFF].value, FILTER_RIPPLE);
+		Filter.process(sampleFrames, inputs);
+		while (--sampleFrames >= 0) {
+			(*out1++) = (*in1++);
+			(*out2++) = (*in2++);
+		}
+	}
+	virtual void processDoubleReplacing(double** inputs, double** outputs,
+			VstInt32 sampleFrames) {
+		double* in1 = inputs[0];
+		double* in2 = inputs[1];
+		double* out1 = outputs[0];
+		double* out2 = outputs[1];
+		Filter.setup(getSampleRate(), FILTER_CHEBYSHEV_ORDER,
+				params[VST_INDEX_CUTOFF].value, FILTER_RIPPLE);
+		Filter.process(sampleFrames, inputs);
+		while (--sampleFrames >= 0) {
+			(*out1++) = (*in1++);
+			(*out2++) = (*in2++);
+		}
+	}
 
 	// Program
-	virtual void setProgramName (char* name);
-	virtual void getProgramName (char* name);
-
+	virtual void setProgramName(char* name) {
+		vst_strncpy(programName, name, kVstMaxProgNameLen);
+	}
+	virtual void getProgramName(char* name) {
+		vst_strncpy(name, programName, kVstMaxProgNameLen);
+		params[VST_INDEX_CUTOFF].value = calc_cutoff(
+				params[VST_INDEX_CUTOFF].raw_value);
+	}
 
 	// Parameters
-	virtual void setParameter (VstInt32 index, float value);
-	virtual float getParameter (VstInt32 index);
-	virtual void getParameterLabel (VstInt32 index, char* label);
-	virtual void getParameterDisplay (VstInt32 index, char* text);
-	virtual void getParameterName (VstInt32 index, char* text);
+	virtual void setParameter(VstInt32 index, float value) {
+		params[index].raw_value = value;
+		if (index == VST_INDEX_SLOPE) {
+			params[index].value = value * FILTER_SLOPE_MAX;
+			// setParameter(VST_INDEX_CUTOFF, params[VST_INDEX_CUTOFF].raw_value);
+		}
+		if (index == VST_INDEX_CUTOFF) {
+			params[VST_INDEX_CUTOFF].value = calc_cutoff(
+					params[VST_INDEX_CUTOFF].raw_value);
+		}
+	}
+	virtual float getParameter(VstInt32 index) {
+		return (float) params[index].raw_value;
+	}
+	virtual void getParameterLabel(VstInt32 index, char* label) {
+		vst_strncpy(label, params[index].label, kVstMaxParamStrLen);
+	}
+	virtual void getParameterDisplay(VstInt32 index, char* text) {
+		float2string((float) params[index].value, text, kVstMaxParamStrLen);
+	}
+	virtual void getParameterName(VstInt32 index, char* label) {
+		vst_strncpy(label, params[index].name, kVstMaxParamStrLen);
+	}
 
-	virtual bool getEffectName (char* name);
-	virtual bool getVendorString (char* text);
-	virtual bool getProductString (char* text);
-	virtual VstInt32 getVendorVersion ();
+	virtual bool getEffectName(char* name) {
+		vst_strncpy(name, EFFECT_NAME, kVstMaxEffectNameLen);
+		return true;
+	}
+	virtual bool getVendorString(char* text) {
+		vst_strncpy(text, VENDOR_STRING, kVstMaxVendorStrLen);
+		return true;
+	}
+	virtual bool getProductString(char* text) {
+		vst_strncpy(text, PRODUCT_NAME, kVstMaxProductStrLen);
+		return true;
+	}
+	virtual VstInt32 getVendorVersion() {
+		return VENDOR_VERSION;
+	}
 
 protected:
 	Dsp::Params filter_params;
-	FILTER_NAME Filter;
+	TFILTER Filter;
 	plugin_params params[VST_PARAMS_COUNT];
-	char programName[kVstMaxProgNameLen+1];
-	double calc_cutoff(double value);
+	char programName[kVstMaxProgNameLen + 1];
+	double calc_cutoff(double value) {
+		return std::min(
+				0.5 * pow(value, params[VST_INDEX_SLOPE].value + 1)
+						* getSampleRate() + 20, 0.5 * getSampleRate());
+	}
 };
 #endif
