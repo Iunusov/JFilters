@@ -9,7 +9,7 @@
 // 
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2013, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2015, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // This Software Development Kit may not be distributed in parts or its entirety  
 // without prior written agreement by Steinberg Media Technologies GmbH. 
@@ -66,7 +66,7 @@
 	#pragma options push -a8
 #elif defined(__GNUC__)
     #pragma pack(push,8)
-    #define VSTCALLBACK
+    #define VSTCALLBACK //__cdecl
 #elif defined(WIN32) || defined(__FLAT__) || defined CBUILDER
 	#pragma pack(push)
 	#pragma pack(8)
@@ -389,4 +389,4 @@ struct ERect
 	#pragma -a-
 #endif
 
-#endif	// __aeffect__
+#endif // __aeffect__

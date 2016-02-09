@@ -9,7 +9,7 @@
 // 
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2013, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2015, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // This Software Development Kit may not be distributed in parts or its entirety  
 // without prior written agreement by Steinberg Media Technologies GmbH. 
@@ -32,8 +32,7 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------------------------
 
-#ifndef __audioeffectx__
-#define __audioeffectx__
+#pragma once
 
 #include "audioeffect.h"	// Version 1.0 base class AudioEffect
 
@@ -269,5 +268,3 @@ public:
 /// @endcond
 //-------------------------------------------------------------------------------------------------------
 };
-
-#endif //__audioeffectx__

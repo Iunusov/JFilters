@@ -9,7 +9,7 @@
 // 
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2013, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2015, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // This Software Development Kit may not be distributed in parts or its entirety  
 // without prior written agreement by Steinberg Media Technologies GmbH. 
@@ -158,9 +158,9 @@ AudioEffect::~AudioEffect ()
 }
 
 //-------------------------------------------------------------------------------------------------------
-void AudioEffect::setEditor (AEffEditor* editor)
+void AudioEffect::setEditor (AEffEditor* _editor)
 {
-	this->editor = editor;
+	editor = _editor;
 	if (editor) 
 		cEffect.flags |= effFlagsHasEditor;
 	else 
@@ -410,11 +410,11 @@ void AudioEffect::dB2string (float value, char* text, VstInt32 maxLen)
 */
 void AudioEffect::Hz2string (float samples, char* text, VstInt32 maxLen)
 {
-	float sampleRate = getSampleRate ();
+	float _sampleRate = getSampleRate ();
 	if (!samples)
 		float2string (0, text, maxLen);
 	else
-		float2string (sampleRate / samples, text, maxLen);
+		float2string (_sampleRate / samples, text, maxLen);
 }
 
 //-------------------------------------------------------------------------------------------------------
@@ -531,7 +531,7 @@ void AudioEffect::int2string (VstInt32 value, char* text, VstInt32 maxLen)
 		value -= digit * div;
 		if (state || digit > 0)
 		{
-			char temp[2] = {'0' + (char)digit, '\0'};
+			char temp[2] = {static_cast<char>('0' + (char)digit), '\0'};
 			vst_strncat (text, temp, maxLen);
 			state = true;
 		}

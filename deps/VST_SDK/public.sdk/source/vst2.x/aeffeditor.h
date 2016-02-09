@@ -9,7 +9,7 @@
 // 
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2013, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2015, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // This Software Development Kit may not be distributed in parts or its entirety  
 // without prior written agreement by Steinberg Media Technologies GmbH. 
@@ -32,8 +32,7 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------------------------
 
-#ifndef __aeffeditor__
-#define __aeffeditor__
+#pragma once
 
 #include "audioeffectx.h"
 
@@ -79,5 +78,3 @@ protected:
 	AudioEffect* effect;	///< associated effect instance
 	void* systemWindow;		///< platform-dependent parent window (HWND or WindowRef)
 };
-
-#endif // __aeffeditor__

@@ -9,7 +9,7 @@
 // 
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2013, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2015, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // This Software Development Kit may not be distributed in parts or its entirety  
 // without prior written agreement by Steinberg Media Technologies GmbH. 
@@ -32,8 +32,7 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------------------------
 
-#ifndef __audioeffect__
-#define __audioeffect__
+#pragma once
 
 #include "pluginterfaces/vst2.x/aeffect.h"	// "c" interface
 
@@ -195,5 +194,3 @@ protected:
 #endif // VST_2_4_EXTENSIONS
 /// @endcond
 };
-
-#endif // __audioeffect__

@@ -9,7 +9,7 @@
 // 
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2013, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2015, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // This Software Development Kit may not be distributed in parts or its entirety  
 // without prior written agreement by Steinberg Media Technologies GmbH. 
@@ -776,10 +776,10 @@ VstInt32 AudioEffectX::offlineGetCurrentMetaPass ()
 //-----------------------------------------------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------------------------------------------
-void AudioEffectX::DECLARE_VST_DEPRECATED (setOutputSamplerate) (float sampleRate)
+void AudioEffectX::DECLARE_VST_DEPRECATED (setOutputSamplerate) (float _sampleRate)
 {
 	if (audioMaster)
-		audioMaster (&cEffect, DECLARE_VST_DEPRECATED (audioMasterSetOutputSampleRate), 0, 0, 0, sampleRate);
+		audioMaster (&cEffect, DECLARE_VST_DEPRECATED (audioMasterSetOutputSampleRate), 0, 0, 0, _sampleRate);
 }
 
 //-----------------------------------------------------------------------------------------------------------------
