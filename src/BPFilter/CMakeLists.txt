@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 project (BPFilter)
 
 add_definitions(-DFILTER_NAME=${PROJECT_NAME})
-add_definitions(-DUID=CCONST('b','g','9','c'))
+add_definitions(-DUID="bg9c")
 
 set (SOURCES 
 	${CMAKE_CURRENT_SOURCE_DIR}/../AFilter.cpp

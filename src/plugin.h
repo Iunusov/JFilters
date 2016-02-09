@@ -34,7 +34,8 @@ public:
 		vst_strncpy(params[VST_INDEX_SLOPE].name, "Slope", LABEL_MAX_LENGTH);
 		setNumInputs(2);		// stereo in
 		setNumOutputs(2);		// stereo out
-		setUniqueID (UID);	// identify
+		const char *a = UID;
+		setUniqueID (CCONST(a[0],a[1],a[2],a[3]));	// identify
 		canProcessReplacing();	// supports replacing output
 		canDoubleReplacing();	// supports double precision processing
 		params[VST_INDEX_CUTOFF].raw_value = 0.5;
