@@ -1,6 +1,7 @@
 #ifndef __plugin__
 #define __plugin__
 
+
 #define LABEL_MAX_LENGTH 32
 
 #define VST_PROGRAMS_COUNT 1

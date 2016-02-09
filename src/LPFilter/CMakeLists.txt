@@ -3,8 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 project (LPFilter)
 
 add_definitions(-DFILTER_NAME=${PROJECT_NAME})
-add_definitions(-DUID=7622372)
-#(CCONST('w','l','2','p'))
+add_definitions(-DUID=CCONST('x','y','2','s'))
 
 set (SOURCES 
 	${CMAKE_CURRENT_SOURCE_DIR}/../AFilter.cpp
