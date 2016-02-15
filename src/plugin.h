@@ -14,6 +14,7 @@
 
 #include <math.h>
 #include <mutex>
+#include <thread>
 #include <string>
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 #include "DspFilters/Dsp.h"
@@ -41,10 +42,14 @@ private:
 		const float freq(getSampleRate() * 0.5);
 		const float minFreqHZ = 20;
 		const float maxFreqHZ = freq - minFreqHZ;
-		params[VST_INDEX_CUTOFF].value = std::min(pow(params[VST_INDEX_CUTOFF].raw_value, params[VST_INDEX_SLOPE].value + 1) * freq + minFreqHZ, freq);
-		if (params[VST_INDEX_CUTOFF].value > maxFreqHZ) {
-			params[VST_INDEX_CUTOFF].value = maxFreqHZ;
+		float calcFreq = pow(params[VST_INDEX_CUTOFF].raw_value, params[VST_INDEX_SLOPE].value + 1) * freq + minFreqHZ;
+		if (calcFreq < minFreqHZ) {
+			 calcFreq = minFreqHZ;
 		}
+		if (calcFreq > maxFreqHZ) {
+			 calcFreq = maxFreqHZ;
+		}
+		params[VST_INDEX_CUTOFF].value = calcFreq;
 	}
 	inline void updateSlopeValue(void) {
 		params[VST_INDEX_SLOPE].value = params[VST_INDEX_SLOPE].raw_value * FILTER_SLOPE_MAX;
