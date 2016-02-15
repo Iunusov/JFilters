@@ -2,12 +2,11 @@
 #include "plugin.h"
 
 AudioEffect* createEffectInstance(audioMasterCallback audioMaster) {
-	return new Plugin<BPFilter>(audioMaster);
+	return new Plugin(audioMaster, new BPFilter);
 }
 
-BPFilter::BPFilter() {
-	Filter = new Dsp::SmoothedFilterDesign<Dsp::RBJ::Design::BandPass1, 2>(
-			2048);
+BPFilter::BPFilter(void) {
+	Filter = new Dsp::SmoothedFilterDesign<Dsp::RBJ::Design::BandPass1, 2>(2048);
 }
 
 void BPFilter::setup(double sRate, int order, double cutoff, double ripple) {

@@ -1,12 +1,10 @@
-#ifndef HP_FILTER_
-#define HP_FILTER_
+#pragma once
 
 #include "AFilter.h"
 
 class HPFilter: public AFilter {
 public:
-	HPFilter();
+	HPFilter(void);
 	void setup(double sRate, int order, double cutoff, double ripple);
 };
 
-#endif

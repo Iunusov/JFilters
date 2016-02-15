@@ -2,12 +2,11 @@
 #include "plugin.h"
 
 AudioEffect* createEffectInstance(audioMasterCallback audioMaster) {
-	return new Plugin<LPFilter>(audioMaster);
+	return new Plugin (audioMaster, new LPFilter);
 }
 
-LPFilter::LPFilter() {
-	Filter = new Dsp::SmoothedFilterDesign<
-			Dsp::ChebyshevI::Design::LowPass<FILTER_CHEBYSHEV_ORDER>, 2>(2048);
+LPFilter::LPFilter(void) {
+	Filter = new Dsp::SmoothedFilterDesign<Dsp::ChebyshevI::Design::LowPass<FILTER_CHEBYSHEV_ORDER>, 2>(2048);
 }
 
 void LPFilter::setup(double sRate, int order, double cutoff, double ripple) {

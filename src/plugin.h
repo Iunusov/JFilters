@@ -1,113 +1,108 @@
-#ifndef __plugin__
-#define __plugin__
+#pragma once
 
-#define LABEL_MAX_LENGTH 32
+#define VST_PROGRAMS_COUNT (1)
+#define VST_PARAMS_COUNT (2)
 
-#define VST_PROGRAMS_COUNT 1
-#define VST_PARAMS_COUNT 2
+#define VST_INDEX_SLOPE (0)
+#define VST_INDEX_CUTOFF (1)
 
-#define VST_INDEX_CUTOFF 1
-#define VST_INDEX_SLOPE 0
+#define FILTER_SLOPE_MAX (5)
+#define FILTER_RIPPLE (0.0001)
+#define FILTER_CHEBYSHEV_ORDER (4)
 
-#define FILTER_SLOPE_MAX 5
-#define FILTER_RIPPLE 0.0001
-#define FILTER_CHEBYSHEV_ORDER 4
+#define CHANNELS_COUNT (2)
 
 #include <math.h>
+#include <mutex>
+#include <string>
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 #include "DspFilters/Dsp.h"
 
-typedef struct {
-	char name[LABEL_MAX_LENGTH];
-	char label[LABEL_MAX_LENGTH];
-	double value;
-	double raw_value;
-} plugin_params;
-template<class TFILTER>
-class Plugin: public AudioEffectX {
+using std::recursive_mutex;
+using std::lock_guard;
+using std::string;
+
+class Plugin : public AudioEffectX {
+private:
+	typedef std::lock_guard<std::recursive_mutex> guard;
+	typedef struct {
+		string name;
+		string label;
+		float value;
+		float raw_value;
+	} PluginParams;
+	AFilter *currentFilter;
+	PluginParams params[VST_PARAMS_COUNT];
+	string programName = "Default";
+	recursive_mutex recursiveMutex;
+	//TODO: rewrite it
+	inline void updateCutoffValue(void) {
+		guard lock(recursiveMutex);
+		const float freq(getSampleRate() * 0.5);
+		const float minFreqHZ = 20;
+		const float maxFreqHZ = freq - minFreqHZ;
+		params[VST_INDEX_CUTOFF].value = std::min(pow(params[VST_INDEX_CUTOFF].raw_value, params[VST_INDEX_SLOPE].value + 1) * freq + minFreqHZ, freq);
+		if (params[VST_INDEX_CUTOFF].value > maxFreqHZ) {
+			params[VST_INDEX_CUTOFF].value = maxFreqHZ;
+		}
+	}
+	inline void updateSlopeValue(void) {
+		params[VST_INDEX_SLOPE].value = params[VST_INDEX_SLOPE].raw_value * FILTER_SLOPE_MAX;
+	}
 public:
-	Plugin(audioMasterCallback audioMaster) :
-			AudioEffectX(audioMaster, VST_PROGRAMS_COUNT, VST_PARAMS_COUNT) {
-		vst_strncpy(params[VST_INDEX_CUTOFF].name, "Cutoff", LABEL_MAX_LENGTH);
-		vst_strncpy(params[VST_INDEX_CUTOFF].label, "Hz", LABEL_MAX_LENGTH);
-		vst_strncpy(params[VST_INDEX_SLOPE].name, "Slope", LABEL_MAX_LENGTH);
-		setNumInputs(2);		// stereo in
-		setNumOutputs(2);		// stereo out
-		const char *a = UID;
-		setUniqueID (CCONST(a[0],a[1],a[2],a[3]));	// identify
-		canProcessReplacing();	// supports replacing output
-		canDoubleReplacing();	// supports double precision processing
-		params[VST_INDEX_CUTOFF].raw_value = 0.5;
+	Plugin(audioMasterCallback audioMaster, AFilter *filter) :
+		AudioEffectX(audioMaster, VST_PROGRAMS_COUNT, VST_PARAMS_COUNT) {
+		currentFilter = filter;
+		params[VST_INDEX_SLOPE].name = "Slope";
+		params[VST_INDEX_SLOPE].label = "";
 		params[VST_INDEX_SLOPE].value = 0;
 		params[VST_INDEX_SLOPE].raw_value = 0;
-		vst_strncpy(programName, "Default", kVstMaxProgNameLen);// default program name
+		params[VST_INDEX_CUTOFF].name = "Cutoff";
+		params[VST_INDEX_CUTOFF].label = "Hz";
+		params[VST_INDEX_CUTOFF].raw_value = 0.5;
+		updateCutoffValue();
+		setNumInputs(CHANNELS_COUNT);
+		setNumOutputs(CHANNELS_COUNT);
+		isSynth(false);
+		setUniqueID(CCONST(UID[0], UID[1], UID[2], UID[3]));
+		canProcessReplacing();
+		canDoubleReplacing();
 	}
-	~Plugin() {
-	}
-
-	// Processing
-	virtual void processReplacing(float** inputs, float** outputs,
-			VstInt32 sampleFrames) {
-		float* in1 = inputs[0];
-		float* in2 = inputs[1];
-		float* out1 = outputs[0];
-		float* out2 = outputs[1];
-		Filter.setup(getSampleRate(), FILTER_CHEBYSHEV_ORDER,
-				params[VST_INDEX_CUTOFF].value, FILTER_RIPPLE);
-		Filter.process(sampleFrames, inputs);
-		while (--sampleFrames >= 0) {
-			(*out1++) = (*in1++);
-			(*out2++) = (*in2++);
-		}
-	}
-	virtual void processDoubleReplacing(double** inputs, double** outputs,
-			VstInt32 sampleFrames) {
-		double* in1 = inputs[0];
-		double* in2 = inputs[1];
-		double* out1 = outputs[0];
-		double* out2 = outputs[1];
-		Filter.setup(getSampleRate(), FILTER_CHEBYSHEV_ORDER,
-				params[VST_INDEX_CUTOFF].value, FILTER_RIPPLE);
-		Filter.process(sampleFrames, inputs);
-		while (--sampleFrames >= 0) {
-			(*out1++) = (*in1++);
-			(*out2++) = (*in2++);
-		}
+	virtual ~Plugin() {
+		delete currentFilter;
 	}
 
-	// Program
-	virtual void setProgramName(char* name) {
-		vst_strncpy(programName, name, kVstMaxProgNameLen);
+	virtual void processReplacing(float** inputs, float** outputs, VstInt32 sampleFrames) {
+		guard lock(recursiveMutex);
+		currentFilter->process(inputs, outputs, sampleFrames);
 	}
-	virtual void getProgramName(char* name) {
-		vst_strncpy(name, programName, kVstMaxProgNameLen);
-		params[VST_INDEX_CUTOFF].value = calc_cutoff(
-				params[VST_INDEX_CUTOFF].raw_value);
+	virtual void processDoubleReplacing(double** inputs, double** outputs, VstInt32 sampleFrames) {
+		guard lock(recursiveMutex);
+		currentFilter->process(inputs, outputs, sampleFrames);
 	}
 
-	// Parameters
 	virtual void setParameter(VstInt32 index, float value) {
+		guard lock(recursiveMutex);
 		params[index].raw_value = value;
 		if (index == VST_INDEX_SLOPE) {
-			params[index].value = value * FILTER_SLOPE_MAX;
-			// setParameter(VST_INDEX_CUTOFF, params[VST_INDEX_CUTOFF].raw_value);
+			updateSlopeValue();
 		}
 		if (index == VST_INDEX_CUTOFF) {
-			params[VST_INDEX_CUTOFF].value = calc_cutoff(
-					params[VST_INDEX_CUTOFF].raw_value);
+			updateCutoffValue();
 		}
+		currentFilter->setup(getSampleRate(), FILTER_CHEBYSHEV_ORDER, params[VST_INDEX_CUTOFF].value, FILTER_RIPPLE);
 	}
 	virtual float getParameter(VstInt32 index) {
-		return (float) params[index].raw_value;
+		return params[index].raw_value;
 	}
 	virtual void getParameterLabel(VstInt32 index, char* label) {
-		vst_strncpy(label, params[index].label, kVstMaxParamStrLen);
+		vst_strncpy(label, params[index].label.c_str(), kVstMaxParamStrLen);
 	}
 	virtual void getParameterDisplay(VstInt32 index, char* text) {
-		float2string((float) params[index].value, text, kVstMaxParamStrLen);
+		float2string(params[index].value, text, kVstMaxParamStrLen);
 	}
 	virtual void getParameterName(VstInt32 index, char* label) {
-		vst_strncpy(label, params[index].name, kVstMaxParamStrLen);
+		vst_strncpy(label, params[index].name.c_str(), kVstMaxParamStrLen);
 	}
 
 	virtual bool getEffectName(char* name) {
@@ -126,15 +121,11 @@ public:
 		return VENDOR_VERSION;
 	}
 
-protected:
-	Dsp::Params filter_params;
-	TFILTER Filter;
-	plugin_params params[VST_PARAMS_COUNT];
-	char programName[kVstMaxProgNameLen + 1];
-	double calc_cutoff(double value) {
-		return std::min(
-				0.5 * pow(value, params[VST_INDEX_SLOPE].value + 1)
-						* getSampleRate() + 20, 0.5 * getSampleRate());
+	virtual void setProgramName(char* name) {
+		programName = name;
+	}
+
+	virtual void getProgramName(char* name) {
+		vst_strncpy(name, programName.c_str(), kVstMaxProgNameLen);
 	}
 };
-#endif

@@ -1,12 +1,10 @@
-#ifndef LP_FILTER_H_
-#define LP_FILTER_H_
+#pragma once
 
 #include "AFilter.h"
 
 class LPFilter: public AFilter {
 public:
-	LPFilter();
+	LPFilter(void);
 	void setup(double sRate, int order, double cutoff, double ripple);
 };
 
-#endif

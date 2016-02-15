@@ -2,12 +2,11 @@
 #include "plugin.h"
 
 AudioEffect* createEffectInstance(audioMasterCallback audioMaster) {
-	return new Plugin<HPFilter>(audioMaster);
+	return new Plugin(audioMaster, new HPFilter);
 }
 
-HPFilter::HPFilter() {
-	Filter = new Dsp::SmoothedFilterDesign<
-			Dsp::ChebyshevI::Design::HighPass<FILTER_CHEBYSHEV_ORDER>, 2>(2048);
+HPFilter::HPFilter(void) {
+	Filter = new Dsp::SmoothedFilterDesign<Dsp::ChebyshevI::Design::HighPass<FILTER_CHEBYSHEV_ORDER>, 2>(2048);
 }
 
 void HPFilter::setup(double sRate, int order, double cutoff, double ripple) {
