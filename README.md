@@ -1,5 +1,7 @@
-# Low-Pass, High-Pass, Band-Pass filter (VST-plugins)
+#VST Filters
 Simple VST filters set, based on DSPFilters library: https://github.com/vinniefalco/DSPFilters
+
+Contains Low-Pass, High-Pass, Band-Pass filter.
 
 Tested in Cubase, FL Studio and Reaper.
 
