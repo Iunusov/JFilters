@@ -6,7 +6,7 @@ void Plugin::updateCutoffValue(void) {
 	const float minFreqHZ = 20;
 	const float maxFreqHZ = freq - minFreqHZ;
 	float calcFreq = pow(params[VST_INDEX_CUTOFF].raw_value,
-			params[VST_INDEX_SLOPE].value + 1) * freq + minFreqHZ;
+			params[VST_INDEX_SLOPE].value + 1) * freq;
 	if (calcFreq < minFreqHZ) {
 		calcFreq = minFreqHZ;
 	}
