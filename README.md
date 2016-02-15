@@ -15,7 +15,7 @@ Possible view in FL Studio:
 
 #Dependencies
 
-c++11 Compiler
+C++11 Compiler (tested with gcc version 4.8.4 and Visual Studio 2015)
 
 CMake >= 3.0 (https://cmake.org/download/)
 
