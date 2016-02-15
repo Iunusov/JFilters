@@ -10,7 +10,7 @@ add_definitions(-DVENDOR_VERSION=1001)
 set(CMAKE_BUILD_TYPE Release)
 
 if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
-  set(MYFLAGS "/GL /Ox /Ob2 /WX- /Oi /MT /openmp /Ot /LTCG")
+  set(MYFLAGS "/GL /Ox /Ob2 /WX- /Oi /Oy /MT /openmp /Ot /LTCG")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MYFLAGS}")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${MYFLAGS}")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MYFLAGS}")
