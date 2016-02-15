@@ -14,11 +14,10 @@ Possible view in FL Studio:
 <img src="http://jsound.org/img/JFilters_FL.png">
 
 #Dependencies
-CMake >= 3.0
 
-c++11 compiler support
+c++11 Compiler
 
-https://cmake.org/download/
+CMake >= 3.0 (https://cmake.org/download/)
 
 #How to build 
 ```bash
