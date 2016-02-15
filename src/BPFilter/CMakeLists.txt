@@ -9,6 +9,7 @@ set (SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/../AFilter.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../BPFilter.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../main.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../Plugin.cpp
 ) 
 
 add_library(${PROJECT_NAME}  SHARED ${SOURCES})

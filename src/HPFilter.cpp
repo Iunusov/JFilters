@@ -1,5 +1,5 @@
 #include "HPFilter.h"
-#include "plugin.h"
+#include "Plugin.h"
 
 AudioEffect* createEffectInstance(audioMasterCallback audioMaster) {
 	return new Plugin(audioMaster, new HPFilter);
