@@ -16,6 +16,8 @@ Possible view in FL Studio:
 #Dependencies
 CMake >= 3.0
 
+c++11 compiler support
+
 https://cmake.org/download/
 
 #How to build 

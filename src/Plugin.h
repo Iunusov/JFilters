@@ -34,7 +34,7 @@ private:
 	inline void updateCutoffValue(void);
 	inline void updateSlopeValue(void);
 	volatile bool isEnabled = false;
-	void setupFilter(void);
+	inline void setupFilter(void);
 public:
 	virtual void open();
 	virtual void close();

@@ -1,21 +1,15 @@
 #include "Plugin.h"
 
 void Plugin::updateCutoffValue(void) {
+	guard lock(recursiveMutex);
 	const float freq(getSampleRate() * 0.5);
-	const float minFreqHZ = 20;
-	const float maxFreqHZ = freq - minFreqHZ;
-	float calcFreq = pow(params[VST_INDEX_CUTOFF].raw_value,
-			params[VST_INDEX_SLOPE].value + 1) * freq;
-	if (calcFreq < minFreqHZ) {
-		calcFreq = minFreqHZ;
-	}
-	if (calcFreq > maxFreqHZ) {
-		calcFreq = maxFreqHZ;
-	}
-	params[VST_INDEX_CUTOFF].value = calcFreq;
+	const float p = pow(params[VST_INDEX_CUTOFF].raw_value, params[VST_INDEX_SLOPE].value + 1);
+	params[VST_INDEX_CUTOFF].value = 1 + p * freq - 2 * p;
 }
 void Plugin::updateSlopeValue(void) {
+	guard lock(recursiveMutex);
 	params[VST_INDEX_SLOPE].value = params[VST_INDEX_SLOPE].raw_value * FILTER_SLOPE_MAX;
+	updateCutoffValue();
 }
 Plugin::Plugin(audioMasterCallback audioMaster, AFilter *filter) :
 	AudioEffectX(audioMaster, VST_PROGRAMS_COUNT, VST_PARAMS_COUNT) {
@@ -42,7 +36,6 @@ void Plugin::setupFilter(void) {
 
 void Plugin::open() {
 	guard lock(recursiveMutex);
-	updateCutoffValue();
 	updateSlopeValue();
 	setupFilter();
 	isEnabled = true;
@@ -60,7 +53,6 @@ void Plugin::suspend() {
 
 void Plugin::resume() {
 	guard lock(recursiveMutex);
-	updateCutoffValue();
 	updateSlopeValue();
 	setupFilter();
 	isEnabled = true;
@@ -86,11 +78,12 @@ void Plugin::setParameter(VstInt32 index, float value) {
 	params[index].raw_value = value;
 	if (index == VST_INDEX_SLOPE) {
 		updateSlopeValue();
+		setupFilter();
 	}
 	if (index == VST_INDEX_CUTOFF) {
 		updateCutoffValue();
+		setupFilter();
 	}
-	currentFilter->setup(getSampleRate(), FILTER_CHEBYSHEV_ORDER, params[VST_INDEX_CUTOFF].value, FILTER_RIPPLE);
 }
 float Plugin::getParameter(VstInt32 index) {
 	return params[index].raw_value;
