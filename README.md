@@ -1,5 +1,6 @@
 # JFilters (Low-Pass, High-Pass, Band-Pass filters)
 Simple VST filters, based on DSPFilters library: https://github.com/vinniefalco/DSPFilters
+Tested in Cubase, FL Studio and Reaper.
 
 #Dependencies
 --------------------------------------
