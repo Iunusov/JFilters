@@ -1,5 +1,5 @@
 #VST Filters
-Simple VST filters set, based on DSPFilters library: https://github.com/vinniefalco/DSPFilters
+Simple VST filters set (with no GUI), based on DSPFilters library: https://github.com/vinniefalco/DSPFilters
 
 Contains Low-Pass, High-Pass, Band-Pass filter.
 
