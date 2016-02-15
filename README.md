@@ -9,6 +9,10 @@ Download Windows binaries: http://jsound.org/dl/JFilters_Windows.zip
 
 <img src="http://jsound.org/img/JFilters.png">
 
+Possible view in FL Studio:
+
+<img src="http://jsound.org/img/JFilters_FL.png">
+
 #Dependencies
 CMake >= 3.0
 
