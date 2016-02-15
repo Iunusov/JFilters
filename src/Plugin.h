@@ -33,7 +33,13 @@ private:
 	recursive_mutex recursiveMutex;
 	inline void updateCutoffValue(void);
 	inline void updateSlopeValue(void);
+	volatile bool isEnabled = false;
+	void setupFilter(void);
 public:
+	virtual void open();
+	virtual void close();
+	virtual void suspend();
+	virtual void resume();
 	Plugin(audioMasterCallback audioMaster, AFilter *filter);
 	virtual ~Plugin();
 	virtual void processReplacing(float** inputs, float** outputs,

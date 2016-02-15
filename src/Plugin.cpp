@@ -1,7 +1,6 @@
 #include "Plugin.h"
 
 void Plugin::updateCutoffValue(void) {
-	guard lock(recursiveMutex);
 	const float freq(getSampleRate() * 0.5);
 	const float minFreqHZ = 20;
 	const float maxFreqHZ = freq - minFreqHZ;
@@ -16,39 +15,69 @@ void Plugin::updateCutoffValue(void) {
 	params[VST_INDEX_CUTOFF].value = calcFreq;
 }
 void Plugin::updateSlopeValue(void) {
-	params[VST_INDEX_SLOPE].value = params[VST_INDEX_SLOPE].raw_value
-			* FILTER_SLOPE_MAX;
+	params[VST_INDEX_SLOPE].value = params[VST_INDEX_SLOPE].raw_value * FILTER_SLOPE_MAX;
 }
 Plugin::Plugin(audioMasterCallback audioMaster, AFilter *filter) :
-		AudioEffectX(audioMaster, VST_PROGRAMS_COUNT, VST_PARAMS_COUNT) {
+	AudioEffectX(audioMaster, VST_PROGRAMS_COUNT, VST_PARAMS_COUNT) {
+	setUniqueID(CCONST(UID[0], UID[1], UID[2], UID[3]));
 	currentFilter = filter;
 	params[VST_INDEX_SLOPE].name = "Slope";
 	params[VST_INDEX_SLOPE].label = "";
-	params[VST_INDEX_SLOPE].value = 0;
-	params[VST_INDEX_SLOPE].raw_value = 0;
+	params[VST_INDEX_SLOPE].raw_value = 0.3;
 	params[VST_INDEX_CUTOFF].name = "Cutoff";
 	params[VST_INDEX_CUTOFF].label = "Hz";
 	params[VST_INDEX_CUTOFF].raw_value = 0.5;
-	updateCutoffValue();
 	setNumInputs(CHANNELS_COUNT);
 	setNumOutputs(CHANNELS_COUNT);
 	isSynth(false);
-	setUniqueID (CCONST(UID[0], UID[1], UID[2], UID[3]));canProcessReplacing
-	();
-	canDoubleReplacing();
+	noTail(true);
+	canProcessReplacing(true);
+	canDoubleReplacing(true);
 }
+
+void Plugin::setupFilter(void) {
+	guard lock(recursiveMutex);
+	currentFilter->setup(getSampleRate(), FILTER_CHEBYSHEV_ORDER, params[VST_INDEX_CUTOFF].value, FILTER_RIPPLE);
+}
+
+void Plugin::open() {
+	guard lock(recursiveMutex);
+	updateCutoffValue();
+	updateSlopeValue();
+	setupFilter();
+	isEnabled = true;
+}
+
+void Plugin::close() {
+	guard lock(recursiveMutex);
+	isEnabled = false;
+}
+
+void Plugin::suspend() {
+	guard lock(recursiveMutex);
+	isEnabled = false;
+}
+
+void Plugin::resume() {
+	guard lock(recursiveMutex);
+	updateCutoffValue();
+	updateSlopeValue();
+	setupFilter();
+	isEnabled = true;
+}
+
 Plugin::~Plugin() {
 	delete currentFilter;
 }
 
-void Plugin::processReplacing(float** inputs, float** outputs,
-		VstInt32 sampleFrames) {
+void Plugin::processReplacing(float** inputs, float** outputs, VstInt32 sampleFrames) {
 	guard lock(recursiveMutex);
+	if (!isEnabled) return;
 	currentFilter->process(inputs, outputs, sampleFrames);
 }
-void Plugin::processDoubleReplacing(double** inputs, double** outputs,
-		VstInt32 sampleFrames) {
+void Plugin::processDoubleReplacing(double** inputs, double** outputs, VstInt32 sampleFrames) {
 	guard lock(recursiveMutex);
+	if (!isEnabled) return;
 	currentFilter->process(inputs, outputs, sampleFrames);
 }
 
@@ -61,8 +90,7 @@ void Plugin::setParameter(VstInt32 index, float value) {
 	if (index == VST_INDEX_CUTOFF) {
 		updateCutoffValue();
 	}
-	currentFilter->setup(getSampleRate(), FILTER_CHEBYSHEV_ORDER,
-			params[VST_INDEX_CUTOFF].value, FILTER_RIPPLE);
+	currentFilter->setup(getSampleRate(), FILTER_CHEBYSHEV_ORDER, params[VST_INDEX_CUTOFF].value, FILTER_RIPPLE);
 }
 float Plugin::getParameter(VstInt32 index) {
 	return params[index].raw_value;
