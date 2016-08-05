@@ -4,7 +4,7 @@ project (JFilters)
 
 add_definitions(-DEFFECT_NAME="${PROJECT_NAME}")
 add_definitions(-DPRODUCT_NAME="JFilters")
-add_definitions(-DVENDOR_STRING="JSound.org")
+add_definitions(-DVENDOR_STRING="https://github.com/R-Tur/JFilters")
 add_definitions(-DVENDOR_VERSION=1001)
 
 set(CMAKE_BUILD_TYPE Release)
