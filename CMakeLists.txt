@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project (JFilters)
 
+set(LIBRARY_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/JFilters_DLL")
+
 add_definitions(-DEFFECT_NAME="${PROJECT_NAME}")
 add_definitions(-DPRODUCT_NAME="JFilters")
 add_definitions(-DVENDOR_STRING="https://github.com/R-Tur/JFilters")
@@ -17,7 +19,6 @@ if((${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC))
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${MYFLAGS}")
 endif()
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/LIB)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
