@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project (BPFilter)
 
-add_definitions(-DFILTER_NAME=${PROJECT_NAME})
+add_definitions(-DEFFECT_NAME="${PROJECT_NAME}")
+add_definitions(-DPRODUCT_NAME="${PROJECT_NAME}")
 add_definitions(-DUID="bg9c")
 
 set (SOURCES 

@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project (HPFilter)
 
-add_definitions(-DFILTER_NAME=${PROJECT_NAME})
+add_definitions(-DEFFECT_NAME="${PROJECT_NAME}")
+add_definitions(-DPRODUCT_NAME="${PROJECT_NAME}")
 add_definitions(-DUID="pxoi")
 
 set (SOURCES 

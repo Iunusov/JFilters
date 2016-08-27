@@ -4,8 +4,6 @@ project (JFilters)
 
 set(LIBRARY_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/JFilters_DLL")
 
-add_definitions(-DEFFECT_NAME="${PROJECT_NAME}")
-add_definitions(-DPRODUCT_NAME="JFilters")
 add_definitions(-DVENDOR_STRING="https://github.com/R-Tur/JFilters")
 add_definitions(-DVENDOR_VERSION=1001)
 
