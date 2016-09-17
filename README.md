@@ -5,13 +5,13 @@ Contains Low-Pass, High-Pass, Band-Pass filter.
 
 Tested in Cubase, FL Studio and Reaper.
 
-Download Windows binaries: http://jsound.org/dl/JFilters_Windows.zip
+Download Windows binaries: http://www.kvraudio.com/product/jfilters-by-r-tur
 
-<img src="http://jsound.org/img/JFilters.png">
+<img src="https://static.kvraudio.com/i/b/jfilters.1474117176.png">
 
 Possible view in FL Studio:
 
-<img src="http://jsound.org/img/JFilters_FL.png">
+<img src="http://static.kvraudio.com/i/b/jfilters.1364275288.png">
 
 #Dependencies
 
