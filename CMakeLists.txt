@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 project (JFilters)
 
 add_definitions(-DVENDOR_STRING="https://github.com/R-Tur/JFilters")
-add_definitions(-DVENDOR_VERSION=1001)
+add_definitions(-DVENDOR_VERSION=1002)
 
 set(CMAKE_BUILD_TYPE Release)
 
@@ -16,7 +16,7 @@ if((${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC))
 endif()
 
 IF(CMAKE_COMPILER_IS_GNUCC)
-	set(MYFLAGS "-Ofast -Wl,--no-undefined")
+	set(MYFLAGS "-Ofast -Wall -Wextra -Wl,--no-undefined")
     set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} ${MYFLAGS}")
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${MYFLAGS}")
 	set(CMAKE_C_FLAGS_RELEASE  "${CMAKE_C_FLAGS_RELEASE} ${MYFLAGS}")

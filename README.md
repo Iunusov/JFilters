@@ -21,6 +21,9 @@ CMake >= 3.0 (https://cmake.org/download/)
 
 #How to build 
 ```bash
+cd deps
+./sync.sh (sync.bat)
+cd ..
 mkdir cmake
 cd cmake
 cmake ..
