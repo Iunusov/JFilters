@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project (JFilters)
 
-add_definitions(-DVENDOR_STRING="https://github.com/R-Tur/JFilters")
+add_definitions(-DVENDOR_STRING="https://github.com/Iunusov/JFilters")
 add_definitions(-DVENDOR_VERSION=1002)
 
 set(CMAKE_BUILD_TYPE Release)

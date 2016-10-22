@@ -2,8 +2,8 @@
 set -e
 echo "Sync started."
 for i in \
-https://github.com/R-Tur/DSPFilters.git \
-https://github.com/R-Tur/VST_SDK_2.4.git
+https://github.com/Iunusov/DSPFilters.git \
+https://github.com/Iunusov/VST_SDK_2.4.git
 do
 filename="$(basename "$i")"
 dir="${filename%.*}"
