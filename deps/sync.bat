@@ -11,7 +11,7 @@ if not exist DSPFilters (
 
 echo VST_SDK_2.4...
 if not exist VST_SDK_2.4 (
-    (git clone https://github.com/Iunusov/VST_SDK_2.4.git)
+    (git clone https://r-tur@bitbucket.org/r-tur/vst_sdk_2.4.git)
 ) else (
     (cd VST_SDK_2.4) && (git pull) && (cd ..)
 )
